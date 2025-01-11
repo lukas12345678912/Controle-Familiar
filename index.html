@@ -12,18 +12,18 @@
         .container {
             max-width: 600px;
             margin: 50px auto;
-            text-align: center; /* Centraliza o título do formulário */
+            text-align: center;
         }
         h1 {
-            font-family: 'Times New Roman', serif; /* Fonte do título */
-            font-weight: bold; /* Coloca o título em negrito */
+            font-family: 'Times New Roman', serif;
+            font-weight: bold;
         }
         form {
             background-color: #f9f9f9;
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: left; /* Mantém os campos do formulário alinhados à esquerda */
+            text-align: left;
         }
         .form-group {
             margin-bottom: 15px;
@@ -54,10 +54,18 @@
         #viewButton:hover {
             background-color: darkgreen;
         }
+        #contabilButton {
+            background-color: #333;
+            color: white;
+            margin-top: 10px;
+        }
+        #contabilButton:hover {
+            background-color: #555;
+        }
         img {
-            margin-top: 20px; /* Espaçamento entre o título e a imagem */
-            width: 2.43cm; /* Largura definida em cm */
-            height: 2.49cm; /* Altura definida em cm */
+            margin-top: 20px;
+            width: 2.43cm;
+            height: 2.49cm;
         }
         .footer {
             position: fixed;
@@ -72,7 +80,6 @@
 <body>
     <div class="container">
         <h1>Controle Familiar</h1>
-        <!-- Imagem da calculadora abaixo do título -->
         <img src="https://img.freepik.com/vetores-gratis/calculadora-floating-cartoon-vector-icon-ilustracao-conceito-de-icone-de-negocios-de-financas-isolado-plano_138676-9297.jpg?semt=ais_hybrid" alt="Calculadora">
         <form id="formulario">
             <div class="form-group">
@@ -85,7 +92,7 @@
             </div>
             <div class="form-group">
                 <label for="valor">Valor (R$):</label>
-                <input type="number" id="valor" name="valor" step="0.01" min="0" required>
+                <input type="text" id="valor" name="valor" required>
             </div>
             <div class="form-group">
                 <label for="forma_de_pagamento">Forma de Pagamento:</label>
@@ -116,15 +123,12 @@
             </div>
             <button type="submit">Enviar</button>
         </form>
-        
-        <!-- Botão para visualizar os dados -->
-        <button id="viewButton" onclick="visualizarPlanilha()">Visualizar Planilha</button>
+        <button id="viewButton" onclick="visualizarPlanilha()">Lançamentos</button>
+        <button id="contabilButton" onclick="abrirContabil()">Contábil</button>
     </div>
-
     <div class="footer">
         Lucas & Ana Software
     </div>
-
     <script>
         const grupoSelect = document.getElementById("grupo");
         const grupoOutrosInput = document.getElementById("grupo_outros");
@@ -138,21 +142,31 @@
         });
 
         document.getElementById("formulario").addEventListener("submit", async function(event) {
-            event.preventDefault(); // Previne o envio padrão do formulário
+            event.preventDefault();
 
             const form = event.target;
             const formData = new FormData(form);
 
-            // Montando o JSON para o SheetDB
-            const data = {
-                data: formData.get("data"),
-                fornecedor: formData.get("fornecedor"),
-                valor: formData.get("valor"),
-                forma_de_pagamento: formData.get("forma_de_pagamento"),
-                compra_parcelada_em_quantas_vezes: formData.get("compra_parcelada_em_quantas_vezes") || "",
-                grupo: formData.get("grupo"),
-                grupo_outros: formData.get("grupo_outros") || ""
-            };
+            let valor = parseFloat(formData.get("valor").replace(".", "").replace(",", "."));
+            let parcelas = parseInt(formData.get("compra_parcelada_em_quantas_vezes")) || 1;
+            let valorPorParcela = (valor / parcelas).toFixed(2).replace(".", ",");
+            let dataInicial = new Date(formData.get("data"));
+
+            const entries = [];
+
+            for (let i = 0; i < parcelas; i++) {
+                let dataParcela = new Date(dataInicial);
+                dataParcela.setMonth(dataParcela.getMonth() + i);
+
+                entries.push({
+                    data: dataParcela.toISOString().split('T')[0],
+                    fornecedor: formData.get("fornecedor"),
+                    valor: valorPorParcela,
+                    forma_de_pagamento: formData.get("forma_de_pagamento"),
+                    grupo: formData.get("grupo"),
+                    grupo_outros: formData.get("grupo_outros") || ""
+                });
+            }
 
             try {
                 const response = await fetch("https://sheetdb.io/api/v1/jf17l98swrnn7", {
@@ -160,12 +174,12 @@
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({ data: [data] }) // Envia o objeto no formato esperado
+                    body: JSON.stringify({ data: entries })
                 });
 
                 if (response.ok) {
                     alert("Dados enviados com sucesso!");
-                    form.reset(); // Reseta o formulário
+                    form.reset();
                 } else {
                     alert("Erro ao enviar os dados. Verifique os campos ou a API.");
                 }
@@ -176,9 +190,13 @@
         });
 
         function visualizarPlanilha() {
-            // Substitua o link abaixo pelo link público da sua planilha
             const linkDaPlanilha = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTS-exYMqNfaNFDXH5zUAavEPwR-gt4vxe6fkSGS9wpzIpswtziuWhVdoMotwOkQ1Err1CkACv6cHsb/pubhtml?gid=0&single=true";
-            window.open(linkDaPlanilha, "_blank"); // Abre em uma nova aba
+            window.open(linkDaPlanilha, "_blank");
+        }
+
+        function abrirContabil() {
+            const linkContabil = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTS-exYMqNfaNFDXH5zUAavEPwR-gt4vxe6fkSGS9wpzIpswtziuWhVdoMotwOkQ1Err1CkACv6cHsb/pubhtml?gid=1909651153&single=true";
+            window.open(linkContabil, "_blank");
         }
     </script>
 </body>
