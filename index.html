@@ -62,6 +62,13 @@
         #contabilButton:hover {
             background-color: #555;
         }
+         #anexarButton {
+            background-color: orange;
+            margin-top: 10px;
+        }
+        #anexarButton:hover {
+            background-color: darkorange;
+        }
         img {
             margin-top: 20px;
             width: 2.43cm;
@@ -127,6 +134,7 @@
         </form>
         <button id="viewButton" onclick="visualizarPlanilha()">Lançamentos</button>
         <button id="contabilButton" onclick="abrirContabil()">Contábil</button>
+        <button id="anexarButton" onclick="abrirAnexar()">Anexar</button>
     </div>
     <div class="footer">
         Lucas & Ana Software
@@ -199,6 +207,11 @@
         function abrirContabil() {
             const linkContabil = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTS-exYMqNfaNFDXH5zUAavEPwR-gt4vxe6fkSGS9wpzIpswtziuWhVdoMotwOkQ1Err1CkACv6cHsb/pubhtml?gid=1909651153&single=true";
             window.open(linkContabil, "_blank");
+        }
+        
+        function abrirAnexar() {
+            const linkAnexar = "https://script.google.com/macros/s/AKfycbxL840LOFbXMJHebTejftR73NqZlPRukih8tkBh4TAD6N9K13IJXOUzX5y0jRg47loIlw/exec";
+            window.open(linkAnexar, "_blank");
         }
     </script>
 </body>
